@@ -8,7 +8,7 @@ import threading
 import time
 import logging as log
 
-regex = re.compile(r'((?P<hours>\d+?)hr)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?')
+regex = re.compile(r'((?P<hours>\d+?)h)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?')
 log_level = {
              'DEBUG':   log.DEBUG,
              'INFO':    log.INFO,
