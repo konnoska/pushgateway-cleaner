@@ -88,10 +88,10 @@ def clean():
         group_path = get_group_path(group_labels)
 
         if needs_deletion(last_push_timestamp):
-            log.info(f"{group_path} needs deletion- last_push: {datetime.fromtimestamp(last_push_timestamp)} more than {c['expiration_duration']} ago")
+            log.info(f"DELETING {group_path} - last_push: {datetime.fromtimestamp(last_push_timestamp)} more than {c['expiration_duration']} ago")
             delete_group(group_path)
         else:
-            log.info(f"{group_path} skipping deletion - last_push: {datetime.fromtimestamp(last_push_timestamp)} less than {c['expiration_duration']} ago")
+            log.info(f"SKIPPING {group_path} - last_push: {datetime.fromtimestamp(last_push_timestamp)} less than {c['expiration_duration']} ago")
 
 
 if __name__ == "__main__":
@@ -105,6 +105,6 @@ if __name__ == "__main__":
         t.start()
         t.join(timeout=10)
         log.debug("sleeping")
-        time.sleep(cleaning_interval)
+        time.sleep(cleaning_interval.seconds)
         
     
