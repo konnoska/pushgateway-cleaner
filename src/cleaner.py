@@ -27,8 +27,8 @@ def get_config():
     Reads configuration from environment.
     '''
     config = {}
-    config["expiration_duration"] = os.environ.get("CLEANER_EXPIRATION_DURATION","5m")
-    config["cleaning_interval"] = os.environ.get("CLEANER_CLEANING_INTERVAL","1m")
+    config["expiration_duration"] = os.environ.get("CLEANER_EXPIRATION_DURATION","24h")
+    config["cleaning_interval"] = os.environ.get("CLEANER_CLEANING_INTERVAL","12h")
     config["endpoint"] = os.environ.get('CLEANER_ENDPOINT','localhost:9091')
     config["path"]     = os.environ.get('CLEANER_PATH',"api/v1/metrics")
     config["log_lvl"]  = os.environ.get('CLEANER_LOG_LVL',"INFO")
