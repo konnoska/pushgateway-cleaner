@@ -1,6 +1,7 @@
 name: Tests
 on: 
-- release
+  release:
+    types: [published]
 jobs:
   docker:
     runs-on: ubuntu-latest
