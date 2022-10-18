@@ -26,7 +26,7 @@ If you run prometheus-pushgateway in k8s, we propose using the cleaner as a side
 ```
 extraContainers: 
   - name: pushgateway-cleaner
-    image: konnoska/pushgateway-cleaner:v0.0.2
+    image: konnoska/pushgateway-cleaner:v0.0.3
     env:
     - name: CLEANER_EXPIRATION_DURATION
       value: "10m"
