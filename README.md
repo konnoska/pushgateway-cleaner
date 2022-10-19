@@ -17,9 +17,9 @@ Pushgateway-cleaner is configured entirely through environmetn variables.
 | ----------------------------| ---------------|-------------|
 | CLEANER_EXPIRATION_DURATION | 24h            | Metric groups whose last push timestamp is older that this value are deleted. Accepted format {hours}h{Minutes}m{Seconds}s i.e. 1h30m20s, 1h, 10m |
 | CLEANER_CLEANING_INTERVAL   | 12h            | Defines how often to start the cleaning routine.| 
-| CLEANER_ENDPOINT            | localhost:9091 | Prometheu's pushgateway endpoint |
-| CLEANER_LOG_LVL             | INFO           | One of DEBUG, INFO, ERROR, WARNING.
-|CLEANER_DRY_EUN|"FALSE"|Set to "TRUE" to dry-run and see which metric groups would be deleted.|
+| CLEANER_ENDPOINT            | localhost:9091 | Prometheu's pushgateway endpoint. |
+| CLEANER_LOG_LVL             | INFO           | One of DEBUG, INFO, ERROR, WARNING. |
+| CLEANER_DRY_RUN             |"FALSE"         |Set to "TRUE" to dry-run and see which metric groups would be deleted.|
 
 ## Proposed Deployment
 
