@@ -11,8 +11,9 @@ import threading
 import time
 import requests
 from collections import namedtuple
+from base64 import urlsafe_b64encode
 
-Metric_Group = namedtuple('Metric_Group', ['path', 'last_timestamp'])
+Metric_Group = namedtuple('Metric_Group', ['path', 'last_timestamp', 'labels'])
 
 regex = re.compile(r'((?P<hours>\d+?)h)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?')
 log_level = {
@@ -61,6 +62,13 @@ def parse_time(time_str:str):
             time_params[name] = int(float(param))
     return timedelta(**time_params)
 
+def b64_enc(value:str):
+    '''
+    Example:
+        >>> b64_enc("some/path")
+        >>> c29tZS9wYXRo
+    '''
+    return urlsafe_b64encode(value.encode('utf-8')).decode('utf8')
 
 def needs_deletion(timestamp):
     '''
@@ -79,9 +87,11 @@ def get_group_path(group_labels:dict):
         >>> get_group_path( {'job':'some_job', 'instance':'some_instance'} )
         >>> 'job/some_job/instance/some_instance'
     '''
-    group_path = f"job/{group_labels.pop('job')}/"
+    _group_labels = {}
+    _group_labels.update(group_labels)
+    group_path = f"job/{_group_labels.pop('job')}/"
     group_path += "/".join( \
-                [f"{label_key}/{label_value}" for label_key,label_value in group_labels.items()]
+                [f"{label_key}@base64/{b64_enc(label_value)}" for label_key,label_value in _group_labels.items()]
             )
     return group_path
 
@@ -95,7 +105,7 @@ def delete_group(group:Metric_Group):
     if not cfg["dry_run"]=="FALSE":
         return
     log.info("DELETING %s - last_push: %s more than %s ago",
-            group.path,
+            group.labels,
             datetime.fromtimestamp(group.last_timestamp),
             cfg['expiration_duration'])
     api = f"http://{cfg['endpoint']}/metrics/{group.path}"
@@ -108,6 +118,7 @@ def clean():
     Get all the metric groups fomr the pushgateway,
     and deletes the expired ones.
     '''
+    log.debug("Starting cleaning loop")
     cfg = get_config()
     resp = requests.get(f"http://{cfg['endpoint']}/{cfg['path']}",timeout=10)
     resp.raise_for_status()
@@ -121,19 +132,21 @@ def clean():
         last_push_timestamp = int(float(metric_group['push_time_seconds']['metrics'][0]['value']))
 
         group = Metric_Group(path=group_path,
+                    labels = group_labels,
                     last_timestamp=last_push_timestamp)
         
         if needs_deletion(last_push_timestamp):
             expired.append(group)
         else:
             log.debug("SKIPPING %s - last_push: %s less than %s ago",
-                group.path,
+                group.labels,
                 datetime.fromtimestamp(group.last_timestamp),
                 cfg['expiration_duration'])
 
     log.info("Expired Groups: %s ", len(expired))
     for exprired_group in expired:
             delete_group(exprired_group)
+    log.debug("Finished cleaning loop")
 
 
 
