@@ -10,7 +10,9 @@ from functools import cache
 import threading
 import time
 import requests
+from collections import namedtuple
 
+Metric_Group = namedtuple('Metric_Group', ['path', 'last_timestamp'])
 
 regex = re.compile(r'((?P<hours>\d+?)h)?((?P<minutes>\d+?)m)?((?P<seconds>\d+?)s)?')
 log_level = {
@@ -19,6 +21,7 @@ log_level = {
              'WARNING': log.WARNING,
              'ERROR':   log.ERROR
             }
+
 
 
 @cache
@@ -32,6 +35,7 @@ def get_config():
     config["endpoint"] = os.environ.get('CLEANER_ENDPOINT','localhost:9091')
     config["path"]     = os.environ.get('CLEANER_PATH',"api/v1/metrics")
     config["log_lvl"]  = os.environ.get('CLEANER_LOG_LVL',"INFO")
+    config["dry_run"]  = os.environ.get('CLEANER_DRY_RUN',"FALSE")
     return config
 
 
@@ -81,14 +85,20 @@ def get_group_path(group_labels:dict):
             )
     return group_path
 
-def delete_group(group_path:str):
+def delete_group(group:Metric_Group):
     '''
     Deletes the metric group defined by the given path.
     Example:
         >>> delete_group("job/some_job/instance/some_instance")
     '''
     cfg = get_config()
-    api = f"http://{cfg['endpoint']}/metrics/{group_path}"
+    if not cfg["dry_run"]=="FALSE":
+        return
+    log.info("DELETING %s - last_push: %s more than %s ago",
+            group.path,
+            datetime.fromtimestamp(group.last_timestamp),
+            cfg['expiration_duration'])
+    api = f"http://{cfg['endpoint']}/metrics/{group.path}"
     resp = requests.delete(api, timeout=10)
     resp.raise_for_status()
 
@@ -102,24 +112,29 @@ def clean():
     resp = requests.get(f"http://{cfg['endpoint']}/{cfg['path']}",timeout=10)
     resp.raise_for_status()
     parsed_resp = resp.json()
-
+    
+    expired = []
     for metric_group in parsed_resp['data']:
 
-        last_push_timestamp = int(float(metric_group['push_time_seconds']['metrics'][0]['value']))
         group_labels = metric_group["labels"]
         group_path = get_group_path(group_labels)
+        last_push_timestamp = int(float(metric_group['push_time_seconds']['metrics'][0]['value']))
 
+        group = Metric_Group(path=group_path,
+                    last_timestamp=last_push_timestamp)
+        
         if needs_deletion(last_push_timestamp):
-            log.info("DELETING %s - last_push: %s more than %s ago",
-                    group_path,
-                    datetime.fromtimestamp(last_push_timestamp),
-                    cfg['expiration_duration'])
-            delete_group(group_path)
+            expired.append(group)
         else:
-            log.info("SKIPPING %s - last_push: %s less than %s ago",
-                    group_path,
-                    datetime.fromtimestamp(last_push_timestamp),
-                    cfg['expiration_duration'])
+            log.debug("SKIPPING %s - last_push: %s less than %s ago",
+                group.path,
+                datetime.fromtimestamp(group.last_timestamp),
+                cfg['expiration_duration'])
+
+    log.info("Expired Groups: %s ", len(expired))
+    for exprired_group in expired:
+            delete_group(exprired_group)
+
 
 
 if __name__ == "__main__":

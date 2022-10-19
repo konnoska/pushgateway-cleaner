@@ -17,7 +17,8 @@ class TestClass(unittest.TestCase):
                 "CLEANER_CLEANING_INTERVAL"   : "6m18s",
                 "CLEANER_ENDPOINT"            : "test:8999",
                 "CLEANER_PATH"                : "test/test",
-                "CLEANER_LOG_LVL"             : "DEBUG"
+                "CLEANER_LOG_LVL"             : "DEBUG",
+                "CLEANER_DRY_RUN"             : "FALSE"
         }
         os.environ.update(self.env)
 
@@ -28,7 +29,8 @@ class TestClass(unittest.TestCase):
                 "cleaning_interval"   : self.env["CLEANER_CLEANING_INTERVAL"],
                 "endpoint"            : self.env["CLEANER_ENDPOINT"],
                 "path"                : self.env["CLEANER_PATH"],
-                "log_lvl"             : self.env["CLEANER_LOG_LVL"]
+                "log_lvl"             : self.env["CLEANER_LOG_LVL"],
+                "dry_run"             : self.env["CLEANER_DRY_RUN"]
         }
         actual_config = get_config()
 
