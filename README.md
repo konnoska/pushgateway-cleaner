@@ -1,6 +1,6 @@
 # Pushgateway-Cleaner
 
-This a lightweight app that cleans old data from prometheus [pushgateway](https://github.com/prometheus/pushgateway). You simple define the expiration duration and the pushgateway-cleaner takes care of the rest. Push-gateway looks for metric groups that were last updated more that `CLEANER_EXPIRATION_DURATION` ago and deletes them.
+This a lightweight app that cleans old data from prometheus [pushgateway](https://github.com/prometheus/pushgateway). You simple define the expiration duration and the pushgateway-cleaner takes care of the rest. Pushgateway-cleaner looks for metric groups that were last updated more that `CLEANER_EXPIRATION_DURATION` ago and deletes them.
 
 ## Note
 If you require this tool 99.9% prometheus-pushgateway is not used as expected, **but** unfort in practice there are those 0.1% of the cases that the cost/effort of fixing this just doesn't worth it. This 0.1% is the reason this tool exists.
@@ -23,7 +23,7 @@ Pushgateway-cleaner is configured entirely through environmetn variables.
 
 ## Proposed Deployment
 
-If you run prometheus-pushgateway in k8s, we propose using the cleaner as a sidecar. The [community's helm chart](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-pushgateway) has builtin support for sidecars, so adding the following configuration to pushgateway's chart should enough.
+If you run prometheus-pushgateway in k8s, we propose using the cleaner as a sidecar. The [community's helm chart](https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-pushgateway) has builtin support for sidecars, so adding the following configuration to pushgateway's chart should be enough.
 ```
 extraContainers: 
   - name: pushgateway-cleaner
