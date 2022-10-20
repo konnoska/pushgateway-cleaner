@@ -1,7 +1,0 @@
-version: "3.9"
-
-services:
-  pushgateway:
-    image: prom/pushgateway
-    ports:
-      - "9091:9091"
