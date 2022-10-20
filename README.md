@@ -1,3 +1,5 @@
+![Tests](https://github.com/konnoska/pushgateway-cleaner/actions/workflows/tests.yaml/badge.svg?branch=main)
+
 # Pushgateway-Cleaner
 
 This a lightweight app that cleans old data from prometheus [pushgateway](https://github.com/prometheus/pushgateway). You simple define the expiration duration and the pushgateway-cleaner takes care of the rest. Pushgateway-cleaner looks for metric groups that were last updated more that `CLEANER_EXPIRATION_DURATION` ago and deletes them.
