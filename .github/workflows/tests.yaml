@@ -1,7 +1,8 @@
 name: Tests
 on: [push]
 jobs:
-  Tests:
+
+  unitTests:
     runs-on: ubuntu-latest
 
     steps:
@@ -10,3 +11,12 @@ jobs:
       with:
         python-version: '3.9' 
     - run: pip install -r requirements.txt && cd tests && python tests.py
+
+  integrationTest:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    - uses: isbang/compose-action@v1.3.2
+    - uses: mikefarah/yq@master
+    - run:  cd tests && ./test.sh
